@@ -10,15 +10,13 @@ anomaly_counts = {'1': 22, '2': 14, '3': 18, '4': 18, '5': 18, '6': 18, '7': 20,
 
 # 2. Génération des comptes (Classe 1 à 9)
 classes = {
-    '1': [f"1{str(i).zfill(3)}" for i in range(100, 199)],
-    '2': [f"2{str(i).zfill(3)}" for i in range(100, 299)],
-    '3': [f"3{str(i).zfill(3)}" for i in range(100, 399)],
-    '4': [f"4{str(i).zfill(3)}" for i in range(100, 499)],
-    '5': [f"5{str(i).zfill(3)}" for i in range(100, 599)],
-    '6': [f"6{str(i).zfill(3)}" for i in range(100, 699)],
-    '7': [f"7{str(i).zfill(3)}" for i in range(100, 799)],
-    '8': [f"8{str(i).zfill(3)}" for i in range(100, 899)],
-    '9': [f"9{str(i).zfill(3)}" for i in range(100, 999)]
+    'facture': ['6121', '6161', '6181', '6231', '6251', '6261', '6271', '6311', '6581', '44111', '44112', '4413', '4415', '4417', '4418'],
+    'salaire_frais': ['6211', '6231'],
+    'tva': ['3455','4455','4456'],
+    'banque': ['512'],
+    'caisse': ['531'],
+    'banque_frais': ['6681', '6711'],
+    'tiers': ['467']
 }
 accounts = [acc for sublist in classes.values() for acc in sublist][:426]
 
@@ -34,8 +32,38 @@ data = {
     'Fabricated_JE': [],
     'TYPE': []
 }
-import random
-from datetime import datetime, timedelta
+def get_source_code(account, amount):
+    is_debit = amount > 0
+
+    # Mapping logique des comptes à un code source numérique
+    source_map = {
+        'facture': ['6121', '6161', '6181', '6231', '6251', '6261', '6271', '6311', '6581', '44111', '44112', '4413', '4415', '4417', '4418'],
+        'salaire_frais': ['6211', '6231'],
+        'tva': ['3455','4455','4456'],
+        'banque': ['512'],
+        'caisse': ['531'],
+        'banque_frais': ['6681', '6711'],
+        'tiers': ['467']
+    }
+
+    if account in source_map['facture']:
+        return 1
+    elif account in source_map['banque']:
+        return 2
+    elif account in source_map['caisse']:
+        return 3
+    elif account in source_map['tva']:
+        return 4
+    elif account in source_map['salaire_frais']:
+        return 5
+    elif account in source_map['banque_frais']:
+        return 6
+    elif account in source_map['tiers']:
+        return 7
+    else:
+        return 7  # valeur par défaut pour écriture manuelle ou inconnue
+
+
 
 def add_anomalies8(data, n=5):
 
@@ -44,7 +72,9 @@ def add_anomalies8(data, n=5):
     comptes_produits = ['701', '707']                # comptes de produits (revenus)
 
     for i in range(n):
-        je_no= f"JE-{je_id}"
+        source = f"{np.random.randint(1, 8)}"
+        company = f"{np.random.randint(1, 10)}"
+        je_no = f'JE-{i+ n_journal_entries - len(anomaly_counts) + 131}'
         montant_total = round(random.uniform(8000, 15000), 2)
 
         montant_tva = round(montant_total * 0.2, 2)
@@ -64,7 +94,7 @@ def add_anomalies8(data, n=5):
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_charge)
         data['AMOUNT'].append(montant_ht)  # débit
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code(compte_charge,montant_ht))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -74,8 +104,8 @@ def add_anomalies8(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append('3455')  # compte TVA déductible (à ajuster selon PC Marocain)
-        data['AMOUNT'].append(montant_tva)  # débit TVA
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(montant_tva,2))  # débit TVA
+        data['SOURCE'].append(get_source_code('3455',montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -85,8 +115,8 @@ def add_anomalies8(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_charge)
-        data['AMOUNT'].append(montant_ht)  # débit (doublon)
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(montant_ht,2))  # débit (doublon)
+        data['SOURCE'].append(get_source_code(compte_charge,montant_ht))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -96,8 +126,8 @@ def add_anomalies8(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append('3455')  # compte TVA déductible (à ajuster selon PC Marocain)
-        data['AMOUNT'].append(montant_tva)  # débit TVA
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(montant_tva,2))  # débit TVA
+        data['SOURCE'].append(get_source_code('3455',montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -107,8 +137,8 @@ def add_anomalies8(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_fournisseur)
-        data['AMOUNT'].append(-(montant_ht + montant_tva))  # crédit
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(-(montant_ht + montant_tva),2))  # crédit
+        data['SOURCE'].append(get_source_code(compte_fournisseur,-(montant_ht+montant_tva)))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -119,8 +149,8 @@ def add_anomalies8(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_produit)
-        data['AMOUNT'].append(-montant_ht)  # crédit (création de revenu)
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(-montant_ht,2))  # crédit (création de revenu)
+        data['SOURCE'].append(get_source_code(compte_produit,-montant_ht))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -130,14 +160,14 @@ def add_anomalies8(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_fournisseur)
-        data['AMOUNT'].append(montant_ht)  # débit (réduction partielle dette)
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(montant_ht,2))  # débit (réduction partielle dette)
+        data['SOURCE'].append(get_source_code(compte_fournisseur,montant_ht))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
         data['TYPE'].append('8')
 
-    return data 
+    return data
 
 def add_anomalies7(data, n=5):
 
@@ -146,8 +176,9 @@ def add_anomalies7(data, n=5):
     compte_fournisseur_4010 = '4010'      # compte fournisseur utilisé pour apurement fictif
 
     for i in range(n):
-        
-        je_no= f"JE-{je_id}"
+        source = f"{np.random.randint(1, 8)}"
+        company = f"{np.random.randint(1, 10)}"
+        je_no = f'JE-{i+ n_journal_entries - len(anomaly_counts) + 111}'
         montant_total = round(random.uniform(8000, 15000), 2)
 
         montant_tva = round(montant_total * 0.2, 2)
@@ -165,8 +196,8 @@ def add_anomalies7(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_produit)
-        data['AMOUNT'].append(-montant_ht)  # crédit
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(-montant_ht,2))  # crédit
+        data['SOURCE'].append(get_source_code(compte_produit,-montant_ht))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -176,8 +207,8 @@ def add_anomalies7(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append('3455')
-        data['AMOUNT'].append(-montant_tva)  # crédit
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(-montant_tva,2))  # crédit
+        data['SOURCE'].append(get_source_code('3455',-montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -187,8 +218,8 @@ def add_anomalies7(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_client)
-        data['AMOUNT'].append(montant_ht + montant_tva)  # débit
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(montant_ht + montant_tva, 2))  # débit
+        data['SOURCE'].append(get_source_code(compte_client,montant_ht+montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -199,8 +230,8 @@ def add_anomalies7(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_client)
-        data['AMOUNT'].append(-(montant_ht + montant_tva))  # crédit
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(-(montant_ht + montant_tva),2))  # crédit
+        data['SOURCE'].append(get_source_code(compte_client,-(montant_ht+montant_tva)))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -210,8 +241,8 @@ def add_anomalies7(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_fournisseur_4010)
-        data['AMOUNT'].append(montant_ht + montant_tva)  # débit
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(montant_ht + montant_tva,2))  # débit
+        data['SOURCE'].append(get_source_code(compte_fournisseur_4010,montant_ht+montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -227,9 +258,10 @@ def add_anomalies6(data, n=5):
     comptes_clients = ['4111', '4112']      # comptes clients
 
     for i in range(n):
-        je_no= f"JE-{je_id}"
+        je_no = f'JE-{i+ n_journal_entries - len(anomaly_counts) + 93}'
         montant_total_reel = round(random.uniform(8000, 15000), 2)
-
+        company = f"{np.random.randint(1, 10)}"
+        source = '1'
         # Gonflement du CA: on augmente le montant réel de 30 à 50%
         facteur_gonflement = random.uniform(1.3, 1.5)
         montant_total_gonfle = round(montant_total_reel * facteur_gonflement, 2)
@@ -252,7 +284,7 @@ def add_anomalies6(data, n=5):
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_produit)
         data['AMOUNT'].append(-montant_ht)  # crédit
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code(compte_produit,-montant_ht))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -263,7 +295,7 @@ def add_anomalies6(data, n=5):
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append('3455')
         data['AMOUNT'].append(-montant_tva)  # crédit
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code('3455',montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -273,8 +305,8 @@ def add_anomalies6(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_client)
-        data['AMOUNT'].append(montant_ht + montant_tva)  # débit
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(montant_ht + montant_tva,2))  # débit
+        data['SOURCE'].append(get_source_code(compte_client,montant_ht+montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -288,7 +320,7 @@ def add_anomalies6(data, n=5):
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_charge)
         data['AMOUNT'].append(montant_charge)  # débit
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code(compte_charge,montant_charge))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -299,7 +331,7 @@ def add_anomalies6(data, n=5):
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append('512')
         data['AMOUNT'].append(-montant_charge)  # crédit
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code('512',-montant_charge))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -313,7 +345,9 @@ def add_anomalies5(data, n=5):
     comptes_clients = ['4111', '4112']
 
     for i in range(n):
-        je_no= f"JE-{je_id}"
+        source = f"{np.random.randint(1, 8)}"
+        company = f"{np.random.randint(1, 10)}"
+        je_no = f'FE-{i+ n_journal_entries - len(anomaly_counts) + 75}'
         montant_total = round(random.uniform(8000, 15000), 2)
 
         # TVA normale
@@ -332,7 +366,7 @@ def add_anomalies5(data, n=5):
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_produit)
         data['AMOUNT'].append(-montant_ht)  # crédit -> montant négatif
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code(compte_produit,-montant_ht))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -343,7 +377,7 @@ def add_anomalies5(data, n=5):
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append('3455')
         data['AMOUNT'].append(-montant_tva)  # crédit -> montant négatif
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code('3455',-montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -353,8 +387,8 @@ def add_anomalies5(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_client)
-        data['AMOUNT'].append(montant_ht + montant_tva)  # débit -> montant positif
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(montant_ht + montant_tva,2))  # débit -> montant positif
+        data['SOURCE'].append(get_source_code(compte_client,montant_ht + montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -371,7 +405,9 @@ def add_anomalies4(data, n=5):
     fournisseurs_441 = ['44111', '44112', '4415']
 
     for i in range(n):
-        je_no= f"JE-{je_id}"
+        source = f"{np.random.randint(1, 8)}"
+        company = f"{np.random.randint(1, 10)}"
+        je_no = f'JE-{i+ n_journal_entries - len(anomaly_counts) + 57}'
         montant_total = round(random.uniform(8000, 15000), 2)
 
         # On garde la TVA normale
@@ -391,7 +427,7 @@ def add_anomalies4(data, n=5):
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_charge)
         data['AMOUNT'].append(montant_ht)
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code(compte_charge,montant_ht))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -402,7 +438,7 @@ def add_anomalies4(data, n=5):
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append('3455')
         data['AMOUNT'].append(montant_tva)
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code('3455',montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -412,8 +448,8 @@ def add_anomalies4(data, n=5):
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append(compte_fournisseur)
-        data['AMOUNT'].append(-(montant_ht + montant_tva))
-        data['SOURCE'].append(source)
+        data['AMOUNT'].append(round(-(montant_ht + montant_tva),2))
+        data['SOURCE'].append(get_source_code(compte_fournisseur,-(montant_ht+montant_tva)))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -436,7 +472,7 @@ def add_anomalies3(data, n=5):
 
 
 
-        je_no= f"JE-{je_id}"
+        je_no = f'JE-{i + n_journal_entries - len(anomaly_counts) + 37}'
         montant_tva = round(random.uniform(1000, 5000), 2)
         eff_date_str = eff_date.strftime('%Y-%m-%d')
 
@@ -445,18 +481,18 @@ def add_anomalies3(data, n=5):
         data['EFF_DATE'].append(eff_date_str)
         data['ACCOUNT'].append('3455')  # TVA récupérable
         data['AMOUNT'].append(montant_tva)
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code('3455',montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
         data['TYPE'].append('3')
-
+        account_fournissuer= random.choice(fournisseurs_441)
         # Crédit fournisseur
         data['JE_NO'].append(je_no)
         data['EFF_DATE'].append(eff_date_str)
-        data['ACCOUNT'].append(random.choice(fournisseurs_441))
+        data['ACCOUNT'].append(account_fournissuer)
         data['AMOUNT'].append(-montant_tva)
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code(account_fournissuer,-montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
@@ -465,7 +501,7 @@ def add_anomalies3(data, n=5):
     return data
 
 
-def add_anomalies2(data,je_id, n=10):
+def add_anomalies2(data, n=10):
 
     
     # Charges typiques utilisées dans les fraudes (souvent non taxables ou fictives)
@@ -481,8 +517,8 @@ def add_anomalies2(data,je_id, n=10):
         company = f"{np.random.randint(1, 10)}"
         eff_date = datetime(2018, 1, 1) + timedelta(days=np.random.randint(0, 730))
         fy = f"{eff_date.year}-{eff_date.month:02d}-01 – {eff_date.year+1}-{(eff_date.month - 1 or 12):02d}-28"
-        je_id+=1
-        je_no= f"JE-{je_id}"
+
+        je_no = f'JE-{i+ n_journal_entries - len(anomaly_counts) + 23}'
         montant_total = round(random.uniform(3000, 15000), 2)
         montant_ht = round(montant_total * 0.8, 2)
         montant_tva = round(montant_total * 0.2, 2)
@@ -502,16 +538,16 @@ def add_anomalies2(data,je_id, n=10):
             data['EFF_DATE'].append(eff_date_str)
             data['ACCOUNT'].append(compte)
             data['AMOUNT'].append(montant)
-            data['SOURCE'].append(source)
+            data['SOURCE'].append(get_source_code(compte,montant))
             data['COMPANY'].append(company)
             data['FY'].append(fy)
             data['Fabricated_JE'].append('1')
             data['TYPE'].append("2")
 
-    return data , je_id
+    return data
 
 
-def add_anomalies1(data, je_id ,n=10):
+def add_anomalies1(data, n=10):
     charges_non_tva = [
     '6121', '6161', '6181', '6211', '6231',
     '6251', '6261', '6271', '6311', '6581',
@@ -531,42 +567,40 @@ def add_anomalies1(data, je_id ,n=10):
         montant_tva = round(montant_total * 0.2, 2)
         compte_fournisseur =random.choice(fournisseurs_441)
         compte_charge_non_tva = random.choice(charges_non_tva)
-        je_id=je_id+1
-        je_no= f"JE-{je_id}"
         # Ligne charge non taxable (débit)
-        data['JE_NO'].append(je_no)
+        data['JE_NO'].append(f"JE-{i+ n_journal_entries - len(anomaly_counts) + 1}")
         data['EFF_DATE'].append(eff_date.strftime('%Y-%m-%d'))
         data['ACCOUNT'].append(compte_charge_non_tva)
         data['AMOUNT'].append(montant_ht)
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code(compte_charge_non_tva, montant_ht))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
         data['TYPE'].append(1)
 
         # Ligne TVA récupérable (débit) – à tort
-        data['JE_NO'].append(je_no)
+        data['JE_NO'].append(f"JE-{i+ n_journal_entries - len(anomaly_counts) + 1}")
         data['EFF_DATE'].append(eff_date.strftime('%Y-%m-%d'))
         data['ACCOUNT'].append(tva_récupérable)
         data['AMOUNT'].append(montant_tva)
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code(tva_récupérable, montant_tva))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
         data['TYPE'].append(1)
 
         # Ligne fournisseur détaillé (crédit)
-        data['JE_NO'].append(je_no)
+        data['JE_NO'].append(f"JE-{i+ n_journal_entries - len(anomaly_counts) + 1}")
         data['EFF_DATE'].append(eff_date.strftime('%Y-%m-%d'))
         data['ACCOUNT'].append(compte_fournisseur)
         data['AMOUNT'].append(-montant_total)
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code(compte_fournisseur, -montant_total))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('1')
         data['TYPE'].append(1)
 
-    return data , je_id
+    return data
 
 
 
@@ -585,20 +619,20 @@ for je_id in range(1, n_journal_entries - len(anomaly_counts) + 1):
     # Fusionner, mélanger et créer les transactions
     all_amounts = np.concatenate([debit_amounts, credit_amounts])
     np.random.shuffle(all_amounts)
-
+    account = np.random.choice(accounts)
     for amount in all_amounts:
         data['JE_NO'].append(f"JE-{je_id}")
         data['EFF_DATE'].append(eff_date.strftime('%Y-%m-%d'))
-        data['ACCOUNT'].append(np.random.choice(accounts))
+        data['ACCOUNT'].append(account)
         data['AMOUNT'].append(amount)
-        data['SOURCE'].append(source)
+        data['SOURCE'].append(get_source_code(account,amount))
         data['COMPANY'].append(company)
         data['FY'].append(fy)
         data['Fabricated_JE'].append('0')
         data['TYPE'].append('0')
 
-add_anomalies1(data, je_id,n=22)
-add_anomalies2(data, je_id,n=14)
+add_anomalies1(data, n=22)
+add_anomalies2(data, n=14)
 add_anomalies3(data, n=20)
 add_anomalies4(data, n=18)
 add_anomalies5(data, n=18)
