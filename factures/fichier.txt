@@ -1,0 +1,17 @@
+AFRIWARE:unique valeurs
+"TypeFacture"  : 14
+"NumFacture"  : 142553
+"NumLigne"  : 2087
+CodeClient  : 6967
+CentreAnalyse : 347
+CompteProduit : 33
+
+
+
+JDE_F0911 UNIQUE VALEURS
+
+GLDCT : 19
+GLDOC : 129133
+GLDJG : 196
+GLJELN : 10865
+GLMCU : 

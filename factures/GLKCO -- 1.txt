@@ -1,0 +1,6 @@
+GLKCO -- 1
+GLDCT -- TypeFacture 
+GLDOC -- NumeroFacture
+GLDGJ -- julienne -- DateFacture
+GLJELN -- max(count(NumFacture)) +1
+GLMCU -- 
